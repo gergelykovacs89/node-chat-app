@@ -1,4 +1,4 @@
-var socket = io();
+let socket = io();
 socket.on('connect', function () {
     console.log('connected to server');
 });
@@ -11,23 +11,27 @@ socket.on('disconnect', function () {
 socket.on('newMessage', function (message) {
     let formattedTime = moment(message.createdAt).format('H:mm a');
 
-    console.log('New message', message);
-    var li = jQuery('<li></li>');
-    li.text(`${message.from} ${formattedTime}: ${message.text}`);
+    let template = jQuery('#message-template').html();
+    let html = Mustache.render(template, {
+        text: message.text,
+        from: message.from,
+        createdAt: formattedTime
+    });
 
-    jQuery('#messages').append(li);
+    jQuery('#messages').append(html);
 });
 
 socket.on('newLocationMessage', function (message) {
     let formattedTime = moment(message.createdAt).format('H:mm a');
 
-    var li = jQuery('<li></li>');
-    var a = jQuery('<a target="_blank">current location</a>');
+    let template = jQuery('#location-message-template').html();
+    let html = Mustache.render(template, {
+        from: message.from,
+        url: message.url,
+        createdAt: formattedTime
+    });
 
-    li.text(`${message.from}  ${formattedTime}: `);
-    a.attr('href', message.url);
-    li.append(a);
-    jQuery('#messages').append(li);
+    jQuery('#messages').append(html);
 });
 
 jQuery('#message-form').on('submit', function (event) {
